@@ -1,0 +1,30 @@
+[
+  {
+    "question": "What is Sentinel and how does it work?",
+    "answer": "Sentinel monitors notifications from any app on your phone. When a notification matches your configured keywords, it triggers a real-world alarm — even if your phone is on silent or the screen is off."
+  },
+  {
+    "question": "Does it work with the phone on silent?",
+    "answer": "Yes. Sentinel can bypass silent and do-not-disturb modes when the alarm is triggered. You configure this per card, so you stay in full control."
+  },
+  {
+    "question": "What is a monitoring card?",
+    "answer": "A card is a rule you create: choose an app, set keywords to match in the notification title and/or body, and pick what alarm to trigger. You can have up to 3 cards for free."
+  },
+  {
+    "question": "What smart devices does it support?",
+    "answer": "Any device that accepts a simple HTTP GET request — Shelly relays, Tapo plugs, Home Assistant, or any custom endpoint. You provide the on/off URLs and Sentinel calls them when the alarm triggers."
+  },
+  {
+    "question": "What's included in Premium?",
+    "answer": "Premium is a one-time purchase that unlocks unlimited monitoring cards, the smart device alarm type, and the ability to import cards shared by other users."
+  },
+  {
+    "question": "Does Sentinel collect or share my data?",
+    "answer": "No. Sentinel processes everything locally on your device. No notification content, keywords, or personal data is ever sent to external servers."
+  },
+  {
+    "question": "The ringtone picker isn't showing my ringtones — what's wrong?",
+    "answer": "This can happen if you've never set a ringtone on your device before. When Sentinel opens the ringtone picker, Android needs a default app to browse your system ringtones. If no app has been assigned yet, Android may show a chooser dialog asking you to pick one — and selecting the wrong app means the ringtone list won't appear correctly. The quickest fix is to set a ringtone once from your phone's Clock or Alarm app — Android will automatically associate the right app, and Sentinel's picker will work correctly from that point on. If you already selected the wrong app by mistake and tapped Always, you'll need to reset it manually under Settings → Apps → Default apps."
+  }
+]

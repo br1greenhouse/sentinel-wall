@@ -10,6 +10,7 @@
     "bodyKeywords": ["your city", "under attack"],
     "bodyOperator": "AND",
     "action": "ringtone + bypass",
+    "category": "gaming",
     "color": "yellow"
   },
   {
@@ -23,6 +24,7 @@
     "bodyKeywords": ["production", "server"],
     "bodyOperator": "AND",
     "action": "smart device",
+    "category": "work",
     "color": "green"
   },
   {
@@ -36,6 +38,7 @@
     "bodyKeywords": ["attack", "started"],
     "bodyOperator": "OR",
     "action": "custom audio",
+    "category": "gaming",
     "color": "pink"
   },
   {
@@ -49,6 +52,7 @@
     "bodyKeywords": ["someone", "front door"],
     "bodyOperator": "OR",
     "action": "smart device",
+    "category": "smart-home",
     "color": "blue"
   },
   {
@@ -62,6 +66,7 @@
     "bodyKeywords": ["urgente", "riunione", "domani"],
     "bodyOperator": "OR",
     "action": "ringtone + bypass",
+    "category": "family",
     "color": "orange"
   },
   {
@@ -75,6 +80,7 @@
     "bodyKeywords": ["wishlist", "lower price"],
     "bodyOperator": "OR",
     "action": "ringtone",
+    "category": "finance",
     "color": "purple"
   },
   {
@@ -88,6 +94,7 @@
     "bodyKeywords": ["arriving", "nearby", "1 min"],
     "bodyOperator": "OR",
     "action": "smart device",
+    "category": "smart-home",
     "color": "yellow"
   },
   {
@@ -101,6 +108,7 @@
     "bodyKeywords": ["target", "alert", "reached"],
     "bodyOperator": "OR",
     "action": "ringtone + bypass",
+    "category": "finance",
     "color": "green"
   }
 ]
