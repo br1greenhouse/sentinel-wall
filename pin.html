@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pin your card · Sentinel Wall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     COERENZA WALL: stesso linguaggio visivo di sentinel-wall/index.html
+     - Background near-black con grid radar sottile
+     - Phosphor green accent (#00ff88)
+     - Share Tech Mono per UI (Caveat e Exo 2 NON usati: sono per il
+       Wall principale, non per UI funzionali)
+     - Palette WCAG AA validata (vedi specifica §5.2)
+     ============================================================ */
+  :root {
+    --bg: #0a0e0a;
+    --bg-panel: #0f1410;
+    --bg-input: #131913;
+    --border: #1f2a20;
+    --border-active: #2a3f2c;
+    --text: #d4e0d4;
+    --text-dim: #a3b0a3;
+    --text-faint: #7a857a;
+    --accent: #00ff88;
+    --accent-dim: #00cc6a;
+    --warn: #ffb84d;
+    --error: #ff5560;
+    --radius: 4px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  /* Radar grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 255, 136, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 136, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  /* === HEADER === */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+    margin-bottom: 32px;
+  }
+  .back-link {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    transition: color .15s;
+  }
+  .back-link:hover { color: var(--accent); }
+  .brand {
+    color: var(--accent);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  /* === TITLE BLOCK === */
+  .title-block { margin-bottom: 40px; }
+  h1 {
+    font-size: 32px;
+    font-weight: normal;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+  h1 .accent { color: var(--accent); }
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 600px;
+  }
+  .subtitle strong { color: var(--text); }
+
+  /* === STEP === */
+  .step {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: border-color .25s, opacity .25s;
+  }
+  .step.locked { opacity: 0.5; pointer-events: none; }
+  .step.active { border-color: var(--border-active); }
+  .step.complete { border-color: var(--accent-dim); }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--border-active);
+    border-radius: 50%;
+    color: var(--text-dim);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .step.active .step-num,
+  .step.complete .step-num {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .step.complete .step-num::after { content: '✓'; }
+  .step.complete .step-num span { display: none; }
+  .step-title {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text);
+  }
+
+  .step-instr {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .step-instr .key { color: var(--text); }
+
+  .section-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .section-label.spaced { margin-bottom: 16px; }
+
+  /* === INPUTS === */
+  textarea, input[type="text"], select {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 12px;
+    transition: border-color .15s;
+    outline: none;
+  }
+  textarea:focus, input[type="text"]:focus, select:focus {
+    border-color: var(--accent-dim);
+  }
+  textarea#sentinelCode {
+    min-height: 110px;
+    resize: vertical;
+    word-break: break-all;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--accent-dim);
+  }
+  textarea#purpose {
+    min-height: 90px;
+    resize: vertical;
+  }
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%23a3b0a3' d='M2 4l4 4 4-4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+  label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  label .req { color: var(--accent); }
+  label .opt { color: var(--text-faint); font-size: 10px; }
+  .field { margin-bottom: 16px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .char-count {
+    text-align: right;
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-top: 4px;
+  }
+  .char-count.warn { color: var(--warn); }
+  .char-count.ok { color: var(--accent-dim); }
+
+  /* === BUTTONS === */
+  button, a.btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all .15s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  button:hover:not(:disabled), a.btn:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  button.secondary, a.btn.secondary {
+    border-color: var(--border-active);
+    color: var(--text-dim);
+  }
+  button.secondary:hover:not(:disabled),
+  a.btn.secondary:hover {
+    background: var(--border-active);
+    color: var(--text);
+  }
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  /* === STATUS MESSAGES === */
+  .status-msg {
+    padding: 12px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    margin-top: 12px;
+    display: none;
+  }
+  .status-msg.show { display: block; }
+  .status-msg.error {
+    background: rgba(255, 85, 96, 0.08);
+    border: 1px solid rgba(255, 85, 96, 0.3);
+    color: var(--error);
+  }
+
+  /* === CARD PREVIEW === */
+  .card-preview {
+    background: var(--bg-input);
+    border-left: 2px solid var(--accent);
+    padding: 16px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin-top: 4px;
+  }
+  .preview-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .preview-row:last-child { border-bottom: none; }
+  .preview-label {
+    color: var(--text-dim);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+  .preview-value { color: var(--text); }
+  .preview-value .case-note {
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-left: 4px;
+  }
+  .keyword-chip {
+    display: inline-block;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.25);
+    color: var(--accent);
+    padding: 1px 8px;
+    border-radius: 2px;
+    font-size: 11px;
+    margin: 2px 4px 2px 0;
+  }
+  .op-chip {
+    display: inline-block;
+    color: var(--warn);
+    font-size: 10px;
+    padding: 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* === PRIVACY NOTICE === */
+  .privacy-notice {
+    background: rgba(255, 184, 77, 0.05);
+    border: 1px solid rgba(255, 184, 77, 0.2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-top: 16px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .privacy-notice .pn-title {
+    color: var(--warn);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .privacy-notice ul {
+    list-style: none;
+    padding-left: 0;
+    color: var(--text-dim);
+  }
+  .privacy-notice ul li { padding: 2px 0; }
+  .privacy-notice ul li::before {
+    content: '— ';
+    color: var(--text-faint);
+  }
+
+  .separator {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 24px 0;
+  }
+
+  /* === CHECKBOX === */
+  .consent {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-top: 16px;
+    cursor: pointer;
+  }
+  .consent input { margin-top: 2px; accent-color: var(--accent); }
+  .consent-label { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+  .consent-label strong { color: var(--text); }
+
+  /* === HONEYPOT === */
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+  /* === SUBMIT FOOTER === */
+  .submit-footer { margin-top: 24px; }
+  .privacy-line {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+  .privacy-line a { color: var(--accent-dim); text-decoration: underline; }
+
+  /* === SUCCESS === */
+  .success-screen {
+    text-align: center;
+    padding: 60px 20px;
+    display: none;
+  }
+  .success-screen.show { display: block; }
+  .success-icon {
+    font-size: 48px;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .success-title {
+    font-size: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+  }
+  .success-msg {
+    color: var(--text-dim);
+    font-size: 14px;
+    max-width: 460px;
+    margin: 0 auto 28px;
+    line-height: 1.6;
+  }
+  .success-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 540px) {
+    h1 { font-size: 24px; }
+    .field-row { grid-template-columns: 1fr; }
+    .preview-row { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <a href="index.html" class="back-link">← Back to the Wall</a>
+    <span class="brand">SENTINEL · WALL</span>
+  </div>
+
+  <!-- TITLE -->
+  <div class="title-block">
+    <h1>Pin your <span class="accent">card</span></h1>
+    <p class="subtitle">
+      Share your Sentinel configuration with the community. Export a card from the app,
+      paste the code below, and our team will review it for publication on the Wall.
+      <strong>No account required.</strong>
+    </p>
+  </div>
+
+  <!-- MAIN FLOW -->
+  <div id="mainFlow">
+
+    <!-- STEP 1 — PASTE -->
+    <div class="step active" id="step1">
+      <div class="step-header">
+        <span class="step-num"><span>1</span></span>
+        <span class="step-title">Paste your card code</span>
+      </div>
+      <p class="step-instr">
+        In the Sentinel app: open your card → tap <span class="key">⋮ menu</span> →
+        <span class="key">Export card</span> → copy the code.
+      </p>
+      <textarea id="sentinelCode" placeholder="SENTINEL:v1:eyJ2ZXJzaW9uIjo1..." spellcheck="false"></textarea>
+      <div id="decodeError" class="status-msg error"></div>
+      <div class="btn-row">
+        <button id="decodeBtn">Decode card</button>
+        <button class="secondary" id="clearBtn">Clear</button>
+      </div>
+    </div>
+
+    <!-- STEP 2 — REVIEW & FORM -->
+    <div class="step locked" id="step2">
+      <div class="step-header">
+        <span class="step-num"><span>2</span></span>
+        <span class="step-title">Review &amp; describe</span>
+      </div>
+
+      <p class="section-label">▸ What will be published</p>
+      <div class="card-preview" id="cardPreview"></div>
+
+      <div class="privacy-notice" id="privacyNotice">
+        <div class="pn-title">⚠ Data NOT shared (stripped locally)</div>
+        <ul id="strippedList"></ul>
+      </div>
+
+      <hr class="separator">
+
+      <p class="section-label spaced">▸ A few details about your card</p>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="displayName">
+            Display name <span class="opt">(optional, 30 chars max)</span>
+          </label>
+          <input type="text" id="displayName" maxlength="30" placeholder="anonymous">
+        </div>
+        <div class="field">
+          <label for="category">
+            Category <span class="req">*</span>
+          </label>
+          <select id="category">
+            <option value="">— select —</option>
+            <option value="gaming">Gaming</option>
+            <option value="work">Work</option>
+            <option value="smart-home">Smart home</option>
+            <option value="family">Family</option>
+            <option value="finance">Finance</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="purpose">
+          Purpose <span class="req">*</span>
+          <span class="opt">(min 30, max 250 chars — what is this card for?)</span>
+        </label>
+        <textarea id="purpose" maxlength="250" placeholder="e.g., Wakes me up if my work alarm clock fails to ring on time."></textarea>
+        <div class="char-count" id="purposeCount">0 / 250</div>
+      </div>
+
+      <!-- HONEYPOT (anti-spam, hidden from real users) -->
+      <input type="text" class="hp" id="hp_website" name="website" tabindex="-1" autocomplete="off">
+
+      <label class="consent">
+        <input type="checkbox" id="consent">
+        <span class="consent-label">
+          <strong>I authorize publication of this card on the Sentinel Wall</strong>
+          under my chosen display name. I confirm the card does not contain personal data
+          beyond what's shown above.
+        </span>
+      </label>
+
+      <div class="submit-footer">
+        <button id="submitBtn" disabled>Submit for review</button>
+        <div id="submitError" class="status-msg error"></div>
+        <p class="privacy-line">
+          Submissions are stored privately for review by the Sentinel maintainer.
+          No personal data is collected — only the fields shown above.
+          <a href="privacy.html">Privacy details</a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Submission received</div>
+    <p class="success-msg">
+      Thank you. Your card is now in the review queue and will appear on the Wall within 7 days
+      if approved. There's no need to wait — you can close this page.
+    </p>
+    <div class="success-actions">
+      <button id="pinAnotherBtn">Pin another card</button>
+      <a class="btn secondary" href="index.html">Back to the Wall</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   ENDPOINT APPS SCRIPT
+   Costante popolata al Macro step 3 (vedi specifica §11).
+   In Fase 1, con stringa vuota, il submit mostra solo la
+   success screen senza fare alcuna POST (utile per testare
+   visivamente il flusso prima del wiring backend).
+   ============================================================ */
+const APPS_SCRIPT_ENDPOINT = "https://script.google.com/macros/s/AKfycbx2PHarK5GOdWuzhqWrAE2Aq_QcIpwJuves_mmPSSj0RUz7E-to0gAUKmsAksUxsLo/exec";
+
+/* ============================================================
+   SENTINEL DECODER — porting JS dell'algoritmo SchedaCodifica.kt
+   Vedi Export_Schede_Tecnica.md §1, §3
+   ============================================================ */
+
+// CRC32 IEEE 802.3 (stesso polinomio di java.util.zip.CRC32)
+const CRC32_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[i] = c >>> 0;
+  }
+  return t;
+})();
+
+// CRC32 calcolato sui byte UTF-8 della stringa (NON sui byte pre-Base64)
+function crc32Hex(str) {
+  const bytes = new TextEncoder().encode(str);
+  let crc = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) {
+    crc = (CRC32_TABLE[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8)) >>> 0;
+  }
+  return ((crc ^ 0xFFFFFFFF) >>> 0).toString(16).toUpperCase();
+}
+
+const DecodeError = {
+  PREFIX:  'This does not look like a Sentinel code. Make sure you copied the entire string starting with "SENTINEL:v1:".',
+  FORMAT:  'The code is incomplete or corrupted. Try copying it again from the app.',
+  CRC:     'The code is corrupted (checksum mismatch). Make sure you copied the entire code without modifications.',
+  VERSION: 'This code was generated by an unsupported version of Sentinel.'
+};
+
+function decodeSentinel(text) {
+  const trimmed = (text || '').trim();
+  if (trimmed.length === 0) throw new Error(DecodeError.FORMAT);
+  if (trimmed.length > 8192) throw new Error(DecodeError.FORMAT);
+  if (!trimmed.startsWith('SENTINEL:v1:')) throw new Error(DecodeError.PREFIX);
+
+  // Devono esserci esattamente 3 ':' (due nel prefisso, uno prima del CRC)
+  const colonCount = (trimmed.match(/:/g) || []).length;
+  if (colonCount !== 3) throw new Error(DecodeError.FORMAT);
+
+  const body = trimmed.substring('SENTINEL:v1:'.length);
+  const lastColon = body.lastIndexOf(':');
+  const base64 = body.substring(0, lastColon);
+  const expectedCrc = body.substring(lastColon + 1).toUpperCase();
+  if (!base64 || !expectedCrc) throw new Error(DecodeError.FORMAT);
+
+  const computedCrc = crc32Hex(base64);
+  if (computedCrc !== expectedCrc) throw new Error(DecodeError.CRC);
+
+  let json;
+  try {
+    // atob gestisce Base64 standard; NO_WRAP non ha whitespace, niente da pulire
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const jsonStr = new TextDecoder('utf-8').decode(bytes);
+    json = JSON.parse(jsonStr);
+  } catch (e) {
+    throw new Error(DecodeError.FORMAT);
+  }
+
+  // Versioni schema supportate: da 1 a 5 (retrocompatibilità totale)
+  if (typeof json.version !== 'number' || json.version < 1 || json.version > 5) {
+    throw new Error(DecodeError.VERSION);
+  }
+
+  return json;
+}
+
+/* ============================================================
+   SANITIZER — rimuove i campi privacy/device-specific
+   Vedi specifica §3.1.2 e Export_Schede_Tecnica.md §5, §8
+   ============================================================ */
+function sanitize(decoded) {
+  const stripped = [];
+  if (decoded.nome) stripped.push('Card internal name');
+  if (decoded.ownerId) stripped.push('Installation ID (anonymous device identifier)');
+  const az = decoded.azione || {};
+  if (az.uriSuoneria) stripped.push('Ringtone URI (device-specific path)');
+  if (az.percorsoAudio) stripped.push('Custom audio file path (device-specific)');
+  if (az.urlSmartOn || az.urlSmartOff) stripped.push('Smart device URLs (your local IP/network address)');
+  if (az.backupUri) stripped.push('Backup ringtone URI (device-specific)');
+  if (az.backupPercorso) stripped.push('Backup audio path (device-specific)');
+
+  // Solo i campi consentiti dalla specifica §3.1.2 finiscono nel payload
+  const safe = {
+    appNome: decoded.appNome,
+    titolo: decoded.titolo ? {
+      abilitato: !!decoded.titolo.abilitato,
+      parole: Array.isArray(decoded.titolo.parole) ? decoded.titolo.parole : [],
+      operatore: decoded.titolo.operatore,
+      caseSensitive: !!decoded.titolo.caseSensitive
+    } : { abilitato: false, parole: [], operatore: 'OR', caseSensitive: false },
+    corpo: decoded.corpo ? {
+      abilitato: !!decoded.corpo.abilitato,
+      parole: Array.isArray(decoded.corpo.parole) ? decoded.corpo.parole : [],
+      operatore: decoded.corpo.operatore,
+      caseSensitive: !!decoded.corpo.caseSensitive
+    } : { abilitato: false, parole: [], operatore: 'OR', caseSensitive: false },
+    azione: {
+      tipo: az.tipo,
+      tipoBanner: az.tipoBanner,
+      ignoraSilenziosa: !!az.ignoraSilenziosa,
+      backupAttivo: !!az.backupAttivo
+    }
+  };
+  return { safe, stripped };
+}
+
+/* ============================================================
+   LABEL MAPPING
+   Vedi specifica §3.1.3 (azione) e §3.1.4 (operatore).
+   Le label sono allineate a quelle in uso in cards.json del Wall.
+   ============================================================ */
+function actionLabel(azioneSafe) {
+  const t = azioneSafe.tipo;
+  if (t === 'SUONERIA') return azioneSafe.ignoraSilenziosa ? 'ringtone + bypass' : 'ringtone';
+  if (t === 'AUDIO_PERSONALIZZATO') return 'custom audio';
+  if (t === 'DISPOSITIVO_SMART') return azioneSafe.backupAttivo ? 'smart device + backup' : 'smart device';
+  return t || 'unknown';
+}
+
+function operatorLabel(op) {
+  if (op === 'AND') return 'all of';
+  if (op === 'OR') return 'any of';
+  if (op === 'NESSUNA') return 'none of';
+  return op;
+}
+
+/* ============================================================
+   UI WIRING
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+let decodedSafe = null;
+
+function escape(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function showDecodeError(msg) {
+  const el = $('decodeError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideDecodeError() { $('decodeError').classList.remove('show'); }
+
+function showSubmitError(msg) {
+  const el = $('submitError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideSubmitError() { $('submitError').classList.remove('show'); }
+
+function renderPreview(safe, stripped) {
+  // Riga "App"
+  const rows = [];
+  rows.push(['App', escape(safe.appNome || '—')]);
+
+  // Riga "Title match"
+  if (safe.titolo && safe.titolo.abilitato && safe.titolo.parole && safe.titolo.parole.length > 0) {
+    const chips = safe.titolo.parole.map(p => `<span class="keyword-chip">${escape(p)}</span>`).join('');
+    const op = `<span class="op-chip">${operatorLabel(safe.titolo.operatore)}</span>`;
+    const cs = safe.titolo.caseSensitive ? ' <span class="case-note">(case-sensitive)</span>' : '';
+    rows.push(['Title match', op + chips + cs]);
+  } else {
+    rows.push(['Title match', '<span style="color:var(--text-faint);">not configured</span>']);
+  }
+
+  // Riga "Body match"
+  if (safe.corpo && safe.corpo.abilitato && safe.corpo.parole && safe.corpo.parole.length > 0) {
+    const chips = safe.corpo.parole.map(p => `<span class="keyword-chip">${escape(p)}</span>`).join('');
+    const op = `<span class="op-chip">${operatorLabel(safe.corpo.operatore)}</span>`;
+    const cs = safe.corpo.caseSensitive ? ' <span class="case-note">(case-sensitive)</span>' : '';
+    rows.push(['Body match', op + chips + cs]);
+  } else {
+    rows.push(['Body match', '<span style="color:var(--text-faint);">not configured</span>']);
+  }
+
+  // Riga "Action"
+  rows.push(['Action', escape(actionLabel(safe.azione))]);
+
+  $('cardPreview').innerHTML = rows.map(([k, v]) =>
+    `<div class="preview-row"><div class="preview-label">${k}</div><div class="preview-value">${v}</div></div>`
+  ).join('');
+
+  // Privacy notice: solo i campi sensibili effettivamente presenti
+  if (stripped.length === 0) {
+    $('privacyNotice').style.display = 'none';
+  } else {
+    $('privacyNotice').style.display = 'block';
+    $('strippedList').innerHTML = stripped.map(s => `<li>${escape(s)}</li>`).join('');
+  }
+}
+
+function unlockStep2() {
+  $('step1').classList.remove('active');
+  $('step1').classList.add('complete');
+  $('step2').classList.remove('locked');
+  $('step2').classList.add('active');
+  $('step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function lockStep2() {
+  $('step2').classList.add('locked');
+  $('step2').classList.remove('active', 'complete');
+  $('step1').classList.remove('complete');
+  $('step1').classList.add('active');
+}
+
+/* ============================================================
+   FORM VALIDATION
+   ============================================================ */
+function validateForm() {
+  const cat = $('category').value;
+  const purpose = $('purpose').value.trim();
+  const consent = $('consent').checked;
+  const valid = decodedSafe && cat && purpose.length >= 30 && purpose.length <= 250 && consent;
+  $('submitBtn').disabled = !valid;
+  return valid;
+}
+
+/* ============================================================
+   EVENT HANDLERS
+   ============================================================ */
+$('decodeBtn').addEventListener('click', () => {
+  hideDecodeError();
+  hideSubmitError();
+  const code = $('sentinelCode').value;
+  try {
+    const decoded = decodeSentinel(code);
+    const { safe, stripped } = sanitize(decoded);
+    decodedSafe = safe;
+    renderPreview(safe, stripped);
+    unlockStep2();
+    validateForm();
+  } catch (e) {
+    decodedSafe = null;
+    showDecodeError(e.message);
+    lockStep2();
+  }
+});
+
+$('clearBtn').addEventListener('click', () => {
+  $('sentinelCode').value = '';
+  hideDecodeError();
+  lockStep2();
+  decodedSafe = null;
+});
+
+$('purpose').addEventListener('input', (e) => {
+  const len = e.target.value.length;
+  const cc = $('purposeCount');
+  cc.textContent = `${len} / 250`;
+  cc.className = 'char-count';
+  if (len < 30) cc.classList.add('warn');
+  else if (len <= 250) cc.classList.add('ok');
+  validateForm();
+});
+
+$('category').addEventListener('change', validateForm);
+$('consent').addEventListener('change', validateForm);
+$('displayName').addEventListener('input', validateForm);
+
+$('submitBtn').addEventListener('click', async () => {
+  hideSubmitError();
+
+  // Honeypot: se compilato è un bot → silent reject (nessun feedback all'utente)
+  if ($('hp_website').value !== '') {
+    return;
+  }
+
+  // Costruzione payload (schema §4)
+  const displayNameVal = $('displayName').value.trim();
+  const payload = {
+    schemaVersion: 1,
+    submittedAt: new Date().toISOString(),
+    displayName: displayNameVal || null,
+    category: $('category').value,
+    purpose: $('purpose').value.trim(),
+    consent: true,
+    honeypot: '',
+    card: decodedSafe // già sanitizzato in fase di decode
+  };
+
+  // Branch Fase 1: endpoint non ancora configurato
+  if (!APPS_SCRIPT_ENDPOINT) {
+    console.warn('[DEV] APPS_SCRIPT_ENDPOINT not configured. Payload that would be sent:', payload);
+    showSuccessScreen();
+    return;
+  }
+
+  // Submit reale (Fase 3+)
+  const btn = $('submitBtn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  try {
+    // Pattern canonico per Apps Script Web App + browser:
+    //  - Content-Type 'text/plain' evita il CORS preflight OPTIONS
+    //  - mode 'no-cors' evita problemi sui redirect cross-origin verso
+    //    script.googleusercontent.com (dove Apps Script consegna la response)
+    //
+    // Trade-off: la response è "opaca", non possiamo leggere status/body.
+    // Se il payload è valido, Apps Script lo scrive sul Sheet; se è invalido
+    // la riga non viene scritta ma l'utente vede comunque la success screen.
+    // È accettabile perché la validazione client-side già blocca i casi non
+    // validi e la review è comunque manuale.
+    await fetch(APPS_SCRIPT_ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+
+    showSuccessScreen();
+  } catch (err) {
+    // Solo errori di rete reali (offline, DNS) finiscono qui
+    console.error('Submit failed:', err);
+    showSubmitError('Could not submit your card. Please check your connection and try again.');
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+});
+
+function showSuccessScreen() {
+  $('mainFlow').style.display = 'none';
+  $('successScreen').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+$('pinAnotherBtn').addEventListener('click', resetAll);
+
+function resetAll() {
+  $('sentinelCode').value = '';
+  $('displayName').value = '';
+  $('category').value = '';
+  $('purpose').value = '';
+  $('purposeCount').textContent = '0 / 250';
+  $('purposeCount').className = 'char-count';
+  $('consent').checked = false;
+  $('hp_website').value = '';
+  hideDecodeError();
+  hideSubmitError();
+  lockStep2();
+  decodedSafe = null;
+  $('submitBtn').disabled = true;
+  $('submitBtn').textContent = 'Submit for review';
+  $('mainFlow').style.display = 'block';
+  $('successScreen').classList.remove('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
