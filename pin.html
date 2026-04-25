@@ -393,6 +393,9 @@
     line-height: 1.5;
   }
   .privacy-line a { color: var(--accent-dim); text-decoration: underline; }
+  /* Privacy details deve restare cliccabile anche con step2 lockato (l'utente
+     puo' voler leggere la privacy prima di decodificare un codice) */
+  .step.locked .privacy-line { pointer-events: auto; }
 
   /* === SUCCESS === */
   .success-screen {
