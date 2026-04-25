@@ -506,6 +506,8 @@
     letter-spacing: .03em;
     box-shadow: 0 4px 15px rgba(204,34,0,.4);
     transition: transform .15s, box-shadow .15s;
+    text-decoration: none;
+    display: inline-block;
   }
   .cta-btn:hover {
     transform: translateY(-2px);
@@ -517,28 +519,6 @@
     font-size: 12px;
     color: #999;
     margin-top: 8px;
-  }
-
-  /* ── TOAST ── */
-  .toast {
-    position: fixed;
-    bottom: 30px; left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: rgba(0,0,0,.88);
-    color: #00ff41;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
-    padding: 12px 28px;
-    border-radius: 6px;
-    border: 1px solid #00ff41;
-    opacity: 0;
-    transition: transform .4s ease, opacity .4s ease;
-    z-index: 100;
-    pointer-events: none;
-  }
-  .toast.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
   }
 
   /* ── FOOTER ── */
@@ -626,7 +606,7 @@
   </div>
 
   <div class="cta-area">
-    <button class="cta-btn" id="ctaBtn">Pin your card to the wall</button>
+    <a class="cta-btn" id="ctaBtn" href="pin.html">Pin your card to the wall</a>
     <div class="cta-sub">// share your sentinel setup with the community</div>
   </div>
 
@@ -639,8 +619,6 @@
   </footer>
 
 </div>
-
-<div class="toast" id="toast">// coming soon — stay tuned!</div>
 
 <script>
 var COLORS = {
@@ -813,13 +791,6 @@ function toggleFaq(i) {
   document.querySelectorAll('.faq-item').forEach(function(el) { el.classList.remove('open'); });
   if (!isOpen) item.classList.add('open');
 }
-
-/* ── CTA / TOAST ── */
-document.getElementById('ctaBtn').addEventListener('click', function() {
-  var toast = document.getElementById('toast');
-  toast.classList.add('show');
-  setTimeout(function() { toast.classList.remove('show'); }, 2500);
-});
 
 /* ── INIT ── */
 loadCards();
