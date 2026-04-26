@@ -528,6 +528,70 @@
   .footer a { color: #00ff41; text-decoration: none; }
   .footer a:hover { text-decoration: underline; }
 
+  /* ── CARD MODAL (read-only zoom) ── */
+  .postit { cursor: pointer; }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 24px;
+    animation: modalFade .18s ease;
+  }
+  .modal-overlay.show { display: flex; }
+  @keyframes modalFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .modal-card {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    justify-content: center;
+  }
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.35);
+    color: rgba(255,255,255,.9);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+  }
+  .modal-close:hover {
+    background: rgba(255,255,255,.1);
+    border-color: rgba(255,255,255,.7);
+  }
+  .postit--modal {
+    transform: none !important;
+    width: 100%;
+    min-height: 320px;
+    padding: 28px 24px 18px;
+    cursor: default;
+    box-shadow: 6px 14px 36px rgba(0,0,0,.6);
+  }
+  .postit--modal .p-user    { font-size: 22px; }
+  .postit--modal .p-app     { font-size: 19px; margin-bottom: 8px; }
+  .postit--modal .p-purpose { font-size: 19px; line-height: 1.4; margin-bottom: 14px; }
+  .postit--modal .p-kl      { font-size: 12px; margin: 8px 0 5px; }
+  .postit--modal .p-kw      { font-size: 13px; padding: 3px 9px; }
+  .postit--modal .p-bot     { font-size: 11px; padding-top: 12px; }
+  .postit--modal .p-cat     { font-size: 10px; }
+  .postit--modal .pin       { width: 22px; height: 22px; top: -8px; }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
     .postit-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -605,6 +669,11 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="cardModal" role="dialog" aria-modal="true" aria-label="Card detail">
+    <button class="modal-close" id="modalClose" aria-label="Close">×</button>
+    <div class="modal-card" id="modalCard"></div>
+  </div>
+
   <footer class="footer">
     <span>&copy; 2026 Bernardo Bruno Serra</span>
     &nbsp;&middot;&nbsp;
@@ -653,11 +722,10 @@ function switchTab(i) {
 }
 
 /* ── CARDS ── */
-function buildCard(card, index) {
-  var rot = ROTATIONS[index % ROTATIONS.length];
-  var colorClass = COLORS[card.color] || 'c-yellow';
-  var html = '<div class="postit ' + colorClass + '" style="transform:rotate(' + rot + 'deg)" data-cat="' + esc(card.category || '') + '">';
-  html += '<div class="pin"></div>';
+var currentCards = [];
+
+function cardInnerHtml(card) {
+  var html = '<div class="pin"></div>';
   html += '<div class="p-user">' + esc(card.user) + '</div>';
   html += '<div class="p-app">' + esc(card.app) + '</div>';
   html += '<div class="p-purpose">' + esc(card.purpose) + '</div>';
@@ -675,17 +743,38 @@ function buildCard(card, index) {
     html += '</div>';
   }
   html += '<div class="p-bot"><span class="p-cat">' + esc(card.category || '') + '</span><span>' + esc(card.action) + '</span></div>';
-  html += '</div>';
   return html;
 }
 
+function buildCard(card, index) {
+  var rot = ROTATIONS[index % ROTATIONS.length];
+  var colorClass = COLORS[card.color] || 'c-yellow';
+  return '<div class="postit ' + colorClass + '" style="transform:rotate(' + rot + 'deg)" data-cat="' + esc(card.category || '') + '" data-idx="' + index + '">' +
+    cardInnerHtml(card) +
+    '</div>';
+}
+
 function renderCards(cards) {
+  currentCards = cards;
   var board = document.getElementById('board');
   if (!cards.length) {
     board.innerHTML = '<p style="color:rgba(255,255,255,.55);text-align:center;font-family:Share Tech Mono,monospace;padding:40px;grid-column:1/-1">// no cards in this category</p>';
     return;
   }
   board.innerHTML = cards.map(buildCard).join('');
+}
+
+function openCardModal(card) {
+  var colorClass = COLORS[card.color] || 'c-yellow';
+  document.getElementById('modalCard').innerHTML =
+    '<div class="postit postit--modal ' + colorClass + '">' + cardInnerHtml(card) + '</div>';
+  document.getElementById('cardModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCardModal() {
+  document.getElementById('cardModal').classList.remove('show');
+  document.body.style.overflow = '';
 }
 
 function filterCards(cat, el) {
@@ -786,6 +875,24 @@ function toggleFaq(i) {
   document.querySelectorAll('.faq-item').forEach(function(el) { el.classList.remove('open'); });
   if (!isOpen) item.classList.add('open');
 }
+
+/* ── CARD MODAL WIRING ── */
+document.getElementById('board').addEventListener('click', function(e) {
+  var postit = e.target.closest('.postit');
+  if (!postit) return;
+  var idx = parseInt(postit.getAttribute('data-idx'), 10);
+  if (isNaN(idx) || idx < 0 || idx >= currentCards.length) return;
+  openCardModal(currentCards[idx]);
+});
+document.getElementById('modalClose').addEventListener('click', closeCardModal);
+document.getElementById('cardModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCardModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('cardModal').classList.contains('show')) {
+    closeCardModal();
+  }
+});
 
 /* ── INIT ── */
 loadCards();
