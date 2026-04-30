@@ -20,6 +20,10 @@
     "answer": "Premium is a one-time purchase that unlocks unlimited monitoring cards and the smart device alarm type."
   },
   {
+    "question": "Does Sentinel keep working after I restart my phone?",
+    "answer": "Yes — in almost all cases Sentinel resumes monitoring automatically after a reboot, with no action required from you.\n\nThis works because Sentinel uses Android's NotificationListenerService. Once you've granted notification access in Settings, the Android system itself keeps a persistent connection to Sentinel and re-binds it automatically when the phone boots. Sentinel doesn't need a boot receiver or any special permission for this.\n\nWhen you might need to do something: a few phone manufacturers — mostly Xiaomi (MIUI/HyperOS), Huawei (EMUI), Honor (MagicOS), Oppo (ColorOS) and Vivo (FuntouchOS) — add aggressive battery-saving layers on top of Android that can kill background services even when permissions are granted. On these devices, after a reboot Sentinel might not resume until you open it once.\n\nFix for these phones: add Sentinel to the 'protected apps' / 'auto-start' list and disable battery optimization for it. The exact menu name varies by brand — search your phone settings for 'autostart', 'protected apps' or 'battery optimization'. The site dontkillmyapp.com has step-by-step guides for every brand.\n\nIf monitoring doesn't resume after a reboot on a stock Android phone (Pixel, Samsung, Motorola, Nokia, etc.), check that notification access for Sentinel is still enabled in Settings → Notifications → Notification access — Android 13+ may revoke it automatically if the app hasn't been opened for a long time."
+  },
+  {
     "question": "Does Sentinel collect or share my data?",
     "answer": "No. Sentinel processes everything locally on your device. No notification content, keywords, or personal data is ever sent to external servers."
   },
