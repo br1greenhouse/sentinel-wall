@@ -480,6 +480,12 @@
     max-height: 4000px;      /* generoso: niente clipping sulle FAQ lunghe */
     padding: 0 18px 18px;
   }
+  .faq-a a {
+    color: #00ff41;
+    text-decoration: underline;
+    word-break: break-word;
+  }
+  .faq-a a:hover { color: #66ff85; }
 
   /* ── CTA ── */
   .cta-area {
@@ -864,6 +870,15 @@ function loadVideos() {
 }
 
 /* ── FAQ ── */
+/* Rende cliccabile il rimando a dontkillmyapp.com. Va applicata DOPO esc():
+   lavora su testo già HTML-safe e inserisce solo il tag <a>. Linkifichiamo
+   esclusivamente il dominio esatto, così i package id tipo
+   com.br1greenhouse.sentinel non vengono toccati. */
+function linkifyFaq(safeHtml) {
+  return safeHtml.replace(/dontkillmyapp\.com/g,
+    '<a href="https://dontkillmyapp.com" target="_blank" rel="noopener">dontkillmyapp.com</a>');
+}
+
 function loadFaq() {
   fetch('faq.json')
     .then(function(r) { return r.json(); })
@@ -876,7 +891,7 @@ function loadFaq() {
           '<span>' + esc(item.question) + '</span>' +
           '<span class="faq-arrow">&#9660;</span>' +
           '</div>' +
-          '<div class="faq-a">' + esc(item.answer) + '</div>' +
+          '<div class="faq-a">' + linkifyFaq(esc(item.answer)) + '</div>' +
           '</div>';
       }).join('');
     })
