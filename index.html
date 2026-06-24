@@ -471,12 +471,13 @@
     line-height: 1.75;
     max-height: 0;
     overflow: hidden;
-    transition: max-height .3s ease, padding .3s;
+    transition: max-height .35s ease, padding .35s;
     padding: 0 18px;
     font-weight: 300;
+    white-space: pre-line;   /* preserva gli a-capo delle risposte multi-riga */
   }
   .faq-item.open .faq-a {
-    max-height: 300px;
+    max-height: 4000px;      /* generoso: niente clipping sulle FAQ lunghe */
     padding: 0 18px 18px;
   }
 
