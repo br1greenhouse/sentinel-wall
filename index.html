@@ -712,6 +712,8 @@ function getVideoType(url) {
 }
 
 /* ── TABS ── */
+var TAB_NAMES = { cards: 0, videos: 1, faq: 2 };
+
 function switchTab(i) {
   document.querySelectorAll('.nav-tab').forEach(function(t, idx) {
     t.classList.toggle('active', idx === i);
@@ -720,6 +722,19 @@ function switchTab(i) {
   document.querySelectorAll('.panel').forEach(function(p, idx) {
     p.classList.toggle('active', idx === i);
   });
+}
+
+/* ── DEEP LINK ──
+   Apre direttamente un tab via GET (?tab=cards|videos|faq) o via hash (#faq),
+   così l'app può linkare l'utente dritto alle FAQ. Se assente o non valido,
+   resta il tab di default (Cards). */
+function applicaDeepLink() {
+  var param = new URLSearchParams(location.search).get('tab');
+  var hash = (location.hash || '').replace('#', '');
+  var chiave = (param || hash || '').toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(TAB_NAMES, chiave)) {
+    switchTab(TAB_NAMES[chiave]);
+  }
 }
 
 /* ── CARDS ── */
@@ -899,6 +914,8 @@ document.addEventListener('keydown', function(e) {
 loadCards();
 loadVideos();
 loadFaq();
+applicaDeepLink();
+window.addEventListener('hashchange', applicaDeepLink);
 </script>
 
 </body>
