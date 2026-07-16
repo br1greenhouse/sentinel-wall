@@ -487,6 +487,52 @@
   }
   .faq-a a:hover { color: #66ff85; }
 
+  /* ── GAME ACADEMY BANNER ── */
+  .academy-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(120deg, rgba(0,255,65,.1), rgba(0,0,0,.4));
+    border: 1px solid rgba(0,255,65,.25);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    text-decoration: none;
+    transition: border-color .2s, transform .2s, background .2s;
+  }
+  .academy-banner:hover {
+    border-color: rgba(0,255,65,.55);
+    background: linear-gradient(120deg, rgba(0,255,65,.16), rgba(0,0,0,.4));
+    transform: translateY(-2px);
+  }
+  .ab-icon { font-size: 26px; flex-shrink: 0; }
+  .ab-body { flex: 1; }
+  .ab-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #00ff41;
+    margin-bottom: 3px;
+  }
+  .ab-text {
+    font-size: 14px;
+    color: #dcdcdc;
+    line-height: 1.4;
+  }
+  .ab-text strong { color: #fff; }
+  .ab-arrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    color: #00ff41;
+    flex-shrink: 0;
+  }
+  @media (max-width: 600px) {
+    .academy-banner { padding: 12px 14px; gap: 10px; }
+    .ab-icon { font-size: 20px; }
+    .ab-text { font-size: 13px; }
+  }
+
   /* ── CTA ── */
   .cta-area {
     text-align: center;
@@ -646,6 +692,14 @@
   <!-- PANEL 0: CARDS -->
   <div class="panel active" id="panel0">
     <div class="panel-label">// community board — pinned setups</div>
+    <a class="academy-banner" href="https://br1greenhouse.github.io/SentinelGameAcademy/" target="_blank" rel="noopener">
+      <span class="ab-icon">🎮</span>
+      <div class="ab-body">
+        <div class="ab-title">Sentinel Game Academy</div>
+        <div class="ab-text">Giochi a strategici mobile come Age of Origins o Clash of Clans? <strong>Scopri le guide complete</strong> — con Sentinel che ti sveglia quando la tua città è sotto attacco.</div>
+      </div>
+      <span class="ab-arrow">→</span>
+    </a>
     <div class="filter-row" id="filterRow">
       <button class="filter-chip active" onclick="filterCards('all', this)">All</button>
     </div>
