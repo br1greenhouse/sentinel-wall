@@ -496,7 +496,7 @@
     border: 1px solid rgba(0,255,65,.25);
     border-radius: 8px;
     padding: 14px 18px;
-    margin-bottom: 22px;
+    margin: 16px 0 20px;
     text-decoration: none;
     transition: border-color .2s, transform .2s, background .2s;
   }
@@ -509,11 +509,11 @@
   .ab-body { flex: 1; }
   .ab-title {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
+    font-size: 15px;
     letter-spacing: .1em;
     text-transform: uppercase;
     color: #00ff41;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
   }
   .ab-text {
     font-size: 14px;
@@ -673,6 +673,14 @@
       <div class="sub">// real setups · real users · real alarms</div>
       <p class="desc">Sentinel monitors your notifications and triggers real-world alarms. Here's how the community uses it — get inspired.</p>
     </div>
+    <a class="academy-banner" href="https://br1greenhouse.github.io/SentinelGameAcademy/" target="_blank" rel="noopener">
+      <span class="ab-icon">🎮</span>
+      <div class="ab-body">
+        <div class="ab-title">Sentinel Game Academy</div>
+        <div class="ab-text">Play strategy mobile games like Age of Origins or Clash of Clans? <strong>Check out the full guides</strong> — with Sentinel waking you up when your base is under attack.</div>
+      </div>
+      <span class="ab-arrow">→</span>
+    </a>
     <nav class="nav-strip" role="tablist">
       <button class="nav-tab active" onclick="switchTab(0)" role="tab" aria-selected="true">
         📌 Pinned cards
@@ -692,14 +700,6 @@
   <!-- PANEL 0: CARDS -->
   <div class="panel active" id="panel0">
     <div class="panel-label">// community board — pinned setups</div>
-    <a class="academy-banner" href="https://br1greenhouse.github.io/SentinelGameAcademy/" target="_blank" rel="noopener">
-      <span class="ab-icon">🎮</span>
-      <div class="ab-body">
-        <div class="ab-title">Sentinel Game Academy</div>
-        <div class="ab-text">Play strategy mobile games like Age of Origins or Clash of Clans? <strong>Check out the full guides</strong> — with Sentinel waking you up when your base is under attack.</div>
-      </div>
-      <span class="ab-arrow">→</span>
-    </a>
     <div class="filter-row" id="filterRow">
       <button class="filter-chip active" onclick="filterCards('all', this)">All</button>
     </div>
